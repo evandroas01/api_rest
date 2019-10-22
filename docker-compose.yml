@@ -1,0 +1,39 @@
+version: "3.1"
+services:
+
+    redis:
+      image: redis:alpine
+      container_name: api-users-redis
+
+    mysql:
+      image: mysql:8.0
+      container_name: api-users-mysql
+      working_dir: /application
+      volumes:
+        - .:/application
+      environment:
+        - MYSQL_ROOT_PASSWORD=password
+        - MYSQL_DATABASE=sys_users
+        - MYSQL_USER=laravel
+        - MYSQL_PASSWORD=password
+      ports:
+        - "8890:3306"
+
+    webserver:
+      image: nginx:alpine
+      container_name: api-users-webserver
+      working_dir: /application
+      volumes:
+          - ./src:/application
+          - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+       - "8888:80"
+
+    php-fpm:
+      build: phpdocker/php-fpm
+      container_name: api-users-php-fpm
+      working_dir: /application
+      volumes:
+        - ./src:/application
+        - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
+
